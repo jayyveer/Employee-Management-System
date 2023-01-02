@@ -73,6 +73,34 @@ router.get("/", async (req, res) => {
     }
 })
 
+//Paginated Api to fetch users
+router.get("/:page/:size", async (req, res) => {
+
+    try {
+        let { page, size } = req.params;
+        if (!page) {
+            page = 1
+        }
+        if (!size) {
+            size = 10
+        }
+        const limit = parseInt(size)
+        const skip = (page - 1) * size
+        const result = await knex.select('*')
+            .from('users')
+            .limit(limit)
+            .offset(skip)
+
+            .catch((error) => {
+                console.log(error)
+                throw "Error occurred while processing your request"
+            })
+        res.send({ message: "Success", data: result })
+    } catch (error) {
+        res.json({ error: error, message: 'Error occurred while processing your request' })
+    }
+})
+
 //APi to get all users other than the admin
 router.get("/employee", async (req, res) => {
     try {
@@ -313,5 +341,6 @@ router.post("/reset-password/:email", async (req, res) => {
         res.json({ error: error, message: 'Error occurred while changing password' })
     }
 })
+
 
 module.exports = router
